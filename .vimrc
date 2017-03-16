@@ -59,11 +59,6 @@ set incsearch
 set hlsearch
 
 """"""
-" Save file as root
-""""""
-cnoremap sudow w !sudo tee % >/dev/null
-
-""""""
 " Code folding
 """"""
 set foldenable
@@ -90,7 +85,7 @@ set showmatch
 set matchtime=1
 set scrolloff=2
 "set completeopt=preview,menu
-set completeopt=longest,menu
+"set completeopt=longest,menu
 set linespace=0
 set backspace=2
 set fillchars=vert:\ ,stl:\ ,stlnc:\
@@ -117,7 +112,7 @@ Plugin 'Valloric/YouCompleteMe'
 Plugin 'SirVer/ultisnips'
 Plugin 'scrooloose/nerdtree'
 Plugin 'majutsushi/tagbar'
-Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 let g:indentLine_char = '¦'
 Plugin 'L9'
@@ -156,7 +151,7 @@ au BufRead,BufNewFile *.am setlocal noexpandtab
 "au BufRead,BufNewFile *.{go}   set filetype=go
 "au BufRead,BufNewFile *.{js}   set filetype=javascript
 
-"au FileType c setlocal dict+=~/.vim/dict/c.dict
+    "au FileType c setlocal dict+=~/.vim/dict/c.dict
 "au FileType css setlocal dict+=~/.vim/dict/css.dict
 "au FileType javascript setlocal dict+=~/.vim/dict/javascript.dict
 "au FileType html setlocal dict+=~/.vim/dict/javascript.dict
@@ -171,6 +166,26 @@ map <S-Right> :tabn<CR>
 " Remove blank line
 "nnoremap <F8> :g/^\s*$/d<CR>
 :noremap <F7> :buffers<CR>:buffer<Space>
+
+""""""
+" Tlist
+""""""
+"let Tlist_Ctags_Cmd = '/usr/bin/ctags'
+"let Tlist_Sort_Type = "name"
+""let Tlist_Use_Right_Window = 1
+"let Tlist_Use_Left_Window = 1
+"let Tlist_Compart_Format = 1
+"let Tlist_File_Fold_Auto_Close = 1
+"let Tlist_Exit_OnlyWindow = 1
+""let Tlist_Enable_Fold_Column = 0
+"let Tlist_Auto_Open= 0
+"let Tlist_Show_One_File = 1
+"let g:miniBufExplMapWindowNavVim = 1
+"let g:miniBufExplMapWindowNavArrows = 1
+"let g:miniBufExplMapCTabSwitchBufs = 1
+"let g:miniBufExplModSelTarget = 1
+":map <F2> :Tlist<CR>
+"nmap tl :Tlist<cr>
 
 """"""
 "tagbar
@@ -202,11 +217,13 @@ let g:airline_theme = 'luna'
 """"""
 " Show Markdown
 """"""
-"nmap md :!~/.vim/markdown.pl % > %.html <CR><CR>
-"nmap <F9>  :!chromium --incognito %.html & <CR><CR>
-"nmap \ \cc
-"vmap \ \cc
+"
+nmap md :!~/.vim/markdown.pl % > %.html <CR><CR>
+nmap <F9>  :!chromium --incognito %.html & <CR><CR>
+nmap \ \cc
+vmap \ \cc
 
+"
 """"""
 " Replace tab by spaces
 """"""
@@ -234,10 +251,10 @@ inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
 inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
 inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 "youcompleteme 默认tab  s-tab 和自动补全冲突
-let g:ycm_key_list_select_completion=['<c-n>']
-"let g:ycm_key_list_select_completion = ['<Down>']
-let g:ycm_key_list_previous_completion=['<c-p>']
-"let g:ycm_key_list_previous_completion = ['<Up>']
+"let g:ycm_key_list_select_completion=['<c-n>']
+let g:ycm_key_list_select_completion = ['<Down>']
+"let g:ycm_key_list_previous_completion=['<c-p>']
+let g:ycm_key_list_previous_completion = ['<Up>']
 "关闭加载.ycm_extra_conf.py提示
 let g:ycm_confirm_extra_conf=0
 " 开启 YCM 基于标签引擎
@@ -291,3 +308,45 @@ let g:syntastic_cpp_check_header = 1
 let g:syntastic_cpp_compiler = 'clang++'
 let g:syntastic_cpp_compiler_options = '-std=c++11 -stdlib=libstdc++'
 let g:syntastic_enable_balloons = 1 "whether to show balloons
+
+""""""
+" Code formating
+""""""
+map <F6> :call FormartSrc()<CR><CR>
+func FormartSrc()
+    exec "w"
+    if &filetype == 'c'
+        exec "!astyle --style=ansi -a --suffix=none %"
+    elseif &filetype == 'cpp' || &filetype == 'hpp'
+        exec "r !astyle --style=ansi --one-line=keep-statements -a --suffix=none %> /dev/null 2>&1"
+    elseif &filetype == 'perl'
+        exec "!astyle --style=gnu --suffix=none %"
+    elseif &filetype == 'py'||&filetype == 'python'
+        exec "r !autopep8 -i --aggressive %"
+    elseif &filetype == 'java'
+        exec "!astyle --style=java --suffix=none %"
+    elseif &filetype == 'jsp'
+        exec "!astyle --style=gnu --suffix=none %"
+    elseif &filetype == 'xml'
+        exec "!astyle --style=gnu --suffix=none %"
+    else
+        exec "normal gg=G"
+        return
+    endif
+    exec "e! %"
+endfunc
+
+
+"""""
+" sudo wirte
+""
+cmap w!! w !sudo tee > /dev/null %
+
+
+"""""""
+"Save cursor position
+"""""""
+augroup resCur
+  autocmd!
+  autocmd BufReadPost * call setpos(".", getpos("'\""))
+augroup END
